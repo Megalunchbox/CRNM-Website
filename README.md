@@ -1,4 +1,4 @@
-Dependencies - Flask, Apache Web Server
+Dependencies - Flask, Flask-WTF, Apache Web Server
 
 How to configure -
 

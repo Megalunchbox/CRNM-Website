@@ -1,60 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Computer Repair Near Me LLC{% endblock %}</title>
     <style>
         /* Standardized CSS */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(to right, #6a11cb, #2575fc);
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* Fallback background */
+            background-color: #000; /* Ensures black background if canvas takes time to render */
             color: #fff;
             text-align: center;
-            overflow: hidden;
+            overflow-x: hidden; /* Prevent horizontal scroll */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            width: 100%; /* Ensure body takes full width */
         }
         nav {
             width: 100%;
             background: linear-gradient(to right, #141e30, #243b55);
-            padding: 10px 0;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 2;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
         }
-        nav ul li {
-            margin: 10px 10px;
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
         }
-        nav ul li a {
+        .nav-menu {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap; /* Ensure items wrap on smaller screens */
+        }
+        .nav-item {
+            list-style: none;
+        }
+        .nav-item a {
             color: #fff;
             text-decoration: none;
             font-weight: bold;
-            font-size: 1rem;
             padding: 8px 12px;
             border-radius: 5px;
             transition: background 0.3s, color 0.3s;
         }
-        nav ul li a:hover {
+        .nav-item a:hover {
             background: #ffdd57;
             color: #333;
         }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+        }
+        .nav-menu-mobile {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            background: linear-gradient(to right, #141e30, #243b55);
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .nav-menu-mobile.active {
+            display: flex;
+        }
         .container {
-            margin-top: 80px;
+            margin-top: 80px; /* Adjusted for nav bar height */
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -65,6 +99,11 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
         }
         h1 {
             margin: 0;
@@ -80,11 +119,13 @@
             font-weight: bold;
         }
         canvas {
-            display: block;
-            position: absolute;
+            position: fixed; /* Ensure canvas is fixed */
             top: 0;
             left: 0;
+            width: 100%; /* Ensure canvas takes full width */
+            height: 100%; /* Ensure canvas takes full height */
             z-index: 0;
+            pointer-events: none; /* Ensure canvas does not block interactions */
         }
         footer {
             background: rgba(0, 0, 0, 0.7);
@@ -95,6 +136,7 @@
             bottom: 0;
             width: 100%;
             box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
         }
         footer p {
             margin: 0;
@@ -102,51 +144,61 @@
         }
         /* Media Queries for Responsiveness */
         @media (max-width: 768px) {
-            nav ul li a {
-                font-size: 0.9rem;
+            .nav-menu {
+                display: none;
             }
-            h1 {
-                font-size: 2rem;
-            }
-            p {
-                font-size: 0.9rem;
-            }
-        }
-        @media (max-width: 480px) {
-            nav ul li {
-                margin: 5px;
-            }
-            nav ul li a {
-                font-size: 0.8rem;
-                padding: 6px 10px;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
-            p {
-                font-size: 0.8rem;
+            .hamburger {
+                display: flex;
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
     <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="#">Products</a></li>
-            <li><a href="#">Services</a></li>
-            <li><a href="#">PC Builder</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="#">Log In</a></li>
-        </ul>
+        <div class="nav-brand">CRNM</div>
+        <div class="nav-menu">
+            <ul class="nav-item"><a href="/">Home</a></ul>
+            <ul class="nav-item"><a href="#">Products</a></ul>
+            <ul class="nav-item"><a href="#">Services</a></ul>
+            <ul class="nav-item"><a href="#">PC Builder</a></ul>
+            <ul class="nav-item"><a href="/about">About</a></ul>
+            <ul class="nav-item"><a href="#">Log In</a></ul>
+        </div>
+        <div class="hamburger" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <div class="nav-menu-mobile">
+            <ul class="nav-item"><a href="/">Home</a></ul>
+            <ul class="nav-item"><a href="#">Products</a></ul>
+            <ul class="nav-item"><a href="#">Services</a></ul>
+            <ul class="nav-item"><a href="#">PC Builder</a></ul>
+            <ul class="nav-item"><a href="/about">About</a></ul>
+            <ul class="nav-item"><a href="#">Log In</a></ul>
+        </div>
     </nav>
     <div class="container">
         {% block content %}{% endblock %}
     </div>
     <canvas id="bgCanvas"></canvas>
     <canvas id="matrixCanvas"></canvas>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        function toggleMenu() {
+            var menu = document.querySelector('.nav-menu-mobile');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            var menu = document.querySelector('.nav-menu-mobile');
+            var hamburger = document.querySelector('.hamburger');
+            if (!menu.contains(event.target) && !hamburger.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
         // Setting up the scene for the 3D cube
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -191,7 +243,7 @@
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Ensuring black background with some transparency
             ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
             ctx.fillStyle = '#0F0';
             ctx.font = fontSize + 'px monospace';

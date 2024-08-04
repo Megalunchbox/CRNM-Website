@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Computer Repair Near Me LLC{% endblock %}
+
+{% block content %}
+<h1>Checkout</h1>
+<form action="/charge" method="post" id="payment-form">
+    <input type="email" name="email" placeholder="Your email" required>
+    <button id="checkout-button">Pay Now</button>
+</form>
+
+<script>
+    var stripe = Stripe('{{ key }}');
+
+    var checkoutButton = document.getElementById('checkout-button');
+
+    checkoutButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        fetch('/create-checkout-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: document.querySelector('input[name="email"]').value })
+        })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            return stripe.redirectToCheckout({ sessionId: data.id });
+        })
+        .then(function (result) {
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(function (error) {
+            console.error('Error:', error);
+        });
+    });
+</script>
+{% endblock %}
